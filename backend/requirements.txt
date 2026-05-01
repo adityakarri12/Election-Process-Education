@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+python-dotenv
+google-genai
+firebase-admin
+pydantic
+python-multipart
+httpx
