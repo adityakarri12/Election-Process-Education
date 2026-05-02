@@ -2,6 +2,9 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -28,6 +31,7 @@
     "@types/react-dom": "^19",
     "eslint": "^10.2.1",
     "eslint-config-next": "16.2.4",
+    "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.2.4",
     "typescript": "^6.0.3"
   }

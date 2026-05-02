@@ -32,11 +32,13 @@ export const ChatAssistant = () => {
   const [isListening, setIsListening] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
+    setIsMounted(true);
     const savedChats = localStorage.getItem('electra_chats');
     if (savedChats) {
       const parsed = JSON.parse(savedChats);
@@ -109,7 +111,7 @@ export const ChatAssistant = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/chatbot', {
+      const response = await fetch('/api/chatbot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: messageToSend })
@@ -156,12 +158,15 @@ export const ChatAssistant = () => {
     }
   };
 
+  if (!isMounted) return null;
+
   return (
     <div suppressHydrationWarning className="flex flex-col h-[calc(100vh-80px)] w-full bg-slate-900/40 border border-white/10 rounded-[3rem] overflow-hidden backdrop-blur-3xl shadow-2xl relative">
       {/* HEADER */}
       <div className="p-4 border-b border-white/10 bg-white/5 flex items-center justify-between z-30">
         <div className="flex items-center gap-4">
           <button 
+            suppressHydrationWarning
             onClick={() => setShowHistory(!showHistory)}
             className="p-2.5 bg-white/5 rounded-xl text-slate-400 hover:text-white transition-all border border-white/5"
           >
@@ -182,6 +187,7 @@ export const ChatAssistant = () => {
         </div>
         <div className="flex items-center gap-3">
           <button 
+            suppressHydrationWarning
             onClick={createNewChat}
             className="px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-xs flex items-center gap-2 hover:scale-105 transition-all shadow-lg"
           >
@@ -210,6 +216,7 @@ export const ChatAssistant = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
               {chats.map(chat => (
                 <button
+                  suppressHydrationWarning
                   key={chat.id}
                   onClick={() => { setActiveChatId(chat.id); setShowHistory(false); }}
                   className={cn(
@@ -263,6 +270,7 @@ export const ChatAssistant = () => {
                   {/* Message Speaker - Top Right of response */}
                   {m.role === 'bot' && (
                     <button 
+                      suppressHydrationWarning
                       onClick={() => handleSpeak(m.text, i)}
                       className={cn(
                         "absolute top-4 right-4 w-10 h-10 rounded-xl flex items-center justify-center transition-all border",
@@ -297,6 +305,7 @@ export const ChatAssistant = () => {
           <div className="flex flex-wrap gap-2 mb-4">
             {QUICK_PROMPTS.map((p, i) => (
               <button 
+                suppressHydrationWarning
                 key={i} 
                 onClick={() => handleSend(p)}
                 className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-[9px] font-bold text-slate-400 hover:text-white hover:bg-primary/20 transition-all uppercase tracking-widest"
@@ -307,6 +316,7 @@ export const ChatAssistant = () => {
           </div>
           <div className="relative group">
             <input
+              suppressHydrationWarning
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -316,6 +326,7 @@ export const ChatAssistant = () => {
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1.5 z-20">
               <button 
+                suppressHydrationWarning
                 onClick={() => {
                   if (isListening) recognitionRef.current?.stop();
                   else recognitionRef.current?.start();
@@ -329,6 +340,7 @@ export const ChatAssistant = () => {
                 {isListening ? <MicOff size={18} /> : <Mic size={18} />}
               </button>
               <button
+                suppressHydrationWarning
                 onClick={() => handleSend()}
                 disabled={isLoading || !input.trim()}
                 className="w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all disabled:opacity-50"

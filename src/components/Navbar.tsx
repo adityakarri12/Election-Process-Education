@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Vote, ChevronRight } from 'lucide-react';
 
 export const Navbar = () => {

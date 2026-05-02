@@ -24,6 +24,13 @@ const MythBuster = () => {
   const [index, setIndex] = useState(0);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [score, setScore] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
 
   const handleAnswer = (answer: boolean) => {
     const isCorrect = answer === MYTHS[index].isTrue;
@@ -40,21 +47,15 @@ const MythBuster = () => {
   return (
     <div className="bg-slate-900/40 border border-white/10 rounded-[3rem] p-10 relative overflow-hidden h-[450px] flex flex-col items-center justify-center text-center">
       <div className="absolute top-0 inset-x-0 h-1 bg-white/5">
-        <motion.div 
-          className="h-full bg-primary" 
-          animate={{ width: `${((index + 1) / MYTHS.length) * 100}%` }} 
+        <div 
+          className="h-full bg-primary transition-all duration-300 ease-out" 
+          style={{ width: `${((index + 1) / MYTHS.length) * 100}%` }} 
         />
       </div>
 
-      <AnimatePresence mode="wait">
+      <div className="relative w-full h-full flex flex-col items-center justify-center">
         {!feedback ? (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-8"
-          >
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-500 text-[10px] font-black uppercase tracking-widest">
               <ShieldAlert size={14} /> Myth vs Reality
             </div>
@@ -64,24 +65,24 @@ const MythBuster = () => {
             <div className="flex gap-4 justify-center">
               <button 
                 onClick={() => handleAnswer(true)}
+                aria-label="Mark as Fact"
+                suppressHydrationWarning
                 className="px-8 py-3 bg-emerald-500 text-white rounded-2xl font-black text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20"
               >
                 FACT
               </button>
               <button 
                 onClick={() => handleAnswer(false)}
+                aria-label="Mark as Myth"
+                suppressHydrationWarning
                 className="px-8 py-3 bg-red-500 text-white rounded-2xl font-black text-sm hover:scale-105 transition-all shadow-lg shadow-red-500/20"
               >
                 MYTH
               </button>
             </div>
-          </motion.div>
+          </div>
         ) : (
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="space-y-6"
-          >
+          <div className="space-y-6 animate-in zoom-in-95 duration-300">
             <div className={cn(
               "w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6",
               feedback === 'correct' ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"
@@ -94,9 +95,9 @@ const MythBuster = () => {
             <p className="text-slate-400 text-sm max-w-md mx-auto leading-relaxed">
               {MYTHS[index].reality}
             </p>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </div>
       
       <div className="absolute bottom-10 right-10">
         <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">XP Gained: <span className="text-primary">{score}</span></p>
@@ -109,12 +110,24 @@ const ConstituencyPulse = () => {
   const [pincode, setPincode] = useState('');
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
 
   const search = async () => {
     if (pincode.length !== 6) return;
     setLoading(true);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/constituency/${pincode}`);
+      const res = await fetch(`/api/constituency/${pincode}`);
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server did not return JSON");
+      }
       const json = await res.json();
       setData(json);
     } catch (e) {
@@ -138,24 +151,26 @@ const ConstituencyPulse = () => {
           placeholder="Enter 6-digit Pincode..."
           value={pincode}
           onChange={(e) => setPincode(e.target.value)}
+          aria-label="Indian Pincode Input"
+          suppressHydrationWarning
           className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-6 pr-20 text-white focus:border-primary/50 outline-none transition-all"
         />
         <button 
           onClick={search}
           disabled={pincode.length !== 6 || loading}
+          aria-label="Search Constituency Details"
+          suppressHydrationWarning
           className="absolute right-2 top-2 bottom-2 px-4 bg-primary text-white rounded-xl text-xs font-black disabled:opacity-50"
         >
           {loading ? <Loader2 className="animate-spin" size={16} /> : 'PULSE'}
         </button>
       </div>
 
-      <AnimatePresence mode="wait">
+      <div className="relative w-full transition-all duration-300">
         {data ? (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+          <div
             key={data.name}
-            className="space-y-6"
+            className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
           >
             <div className="p-6 bg-primary/10 border border-primary/20 rounded-3xl">
               <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">{data.state}</p>
@@ -180,41 +195,33 @@ const ConstituencyPulse = () => {
                 <p className="text-sm font-bold text-emerald-500 leading-tight">{data.turnout}</p>
               </div>
             </div>
-          </motion.div>
+          </div>
         ) : (
-          <div className="h-40 flex flex-col items-center justify-center text-center opacity-30">
+          <div className="h-40 flex flex-col items-center justify-center text-center opacity-30 animate-in fade-in duration-300">
             <Globe size={48} className="text-slate-600 mb-4" />
             <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">Universal Intelligence Ready</p>
           </div>
         )}
-      </AnimatePresence>
+      </div>
     </div>
   );
 };
 
 export default function IntelligencePage() {
   const [liveIntel, setLiveIntel] = useState<any>(null);
-  const [countdown, setCountdown] = useState({ days: 0, hours: 0, mins: 0 });
-  const [hoveredEvent, setHoveredEvent] = useState<any>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
   useEffect(() => {
     const fetchLiveIntel = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/intelligence/live');
+        const res = await fetch(`/api/intelligence/live`);
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Server did not return JSON");
+        }
         const data = await res.json();
         setLiveIntel(data);
-
-        const target = new Date(data.next_major_event.date).getTime();
-        const now = new Date().getTime();
-        const diff = target - now;
-        
-        if (diff > 0) {
-          setCountdown({
-            days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-            hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-            mins: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-          });
-        }
       } catch (e) {
         console.error("Failed to fetch live intel", e);
       }
@@ -229,130 +236,164 @@ export default function IntelligencePage() {
 
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {/* Real-time Countdown */}
-          <div className="lg:col-span-2 bg-gradient-to-br from-primary/20 to-transparent border border-primary/20 rounded-[3.5rem] p-12 relative overflow-hidden">
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <Sparkles className="text-primary" />
-                <span className="text-xs font-black text-primary uppercase tracking-[0.3em]">Operational Intel Hub</span>
-              </div>
-              
-              <AnimatePresence mode="wait">
-                {liveIntel ? (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <h1 className="text-5xl font-black text-white mb-4 tracking-tighter leading-tight">
-                      {liveIntel.next_major_event.title}
-                    </h1>
-                    <p className="text-slate-400 text-sm mb-10 max-w-lg leading-relaxed">
-                      {liveIntel.next_major_event.description}
-                    </p>
-                    
-                    <div className="flex gap-8">
-                      {[
-                        { label: 'Days', val: countdown.days },
-                        { label: 'Hours', val: countdown.hours },
-                        { label: 'Minutes', val: countdown.mins }
-                      ].map((t, i) => (
-                        <div key={i} className="text-center">
-                          <p className="text-5xl font-black text-white mb-1">{t.val.toString().padStart(2, '0')}</p>
-                          <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">{t.label}</p>
-                        </div>
-                      ))}
-                      <div className="w-px h-12 bg-white/10 mx-2 self-center" />
-                      <div className="self-center">
-                        <p className="text-xs font-black text-emerald-500 uppercase tracking-widest">Countdown Active</p>
-                        <p className="text-[10px] text-slate-500 font-bold">{new Date(liveIntel.next_major_event.date).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <div className="flex items-center gap-4 py-20 text-slate-500">
-                    <Loader2 className="animate-spin" /> Fetching live intel...
-                  </div>
-                )}
-              </AnimatePresence>
-            </div>
-            <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-primary/20 rounded-full blur-[100px]" />
-          </div>
-
           {/* Real-time Calendar with Hover Details */}
-          <div className="bg-slate-900/40 border border-white/10 rounded-[3.5rem] p-10 relative">
-            <h3 className="text-xl font-black text-white mb-8 flex items-center gap-3">
-              <Calendar size={20} className="text-primary" /> Live Calendar
+          <div className="lg:col-span-3 bg-slate-900/40 border border-white/10 rounded-[3.5rem] p-10 relative">
+            <h3 className="text-2xl font-black text-white mb-10 flex items-center gap-3">
+              <Calendar size={24} className="text-primary" /> Electoral Intelligence
             </h3>
-            <div className="space-y-6 relative">
-              {liveIntel ? (
-                liveIntel.calendar.map((event: any, i: number) => (
-                  <div 
-                    key={i} 
-                    onMouseEnter={() => setHoveredEvent(event)}
-                    onMouseLeave={() => setHoveredEvent(null)}
-                    className="flex items-center gap-4 group cursor-pointer relative"
-                  >
-                    <div className="w-14 h-14 bg-white/5 rounded-2xl flex flex-col items-center justify-center border border-white/10 group-hover:bg-primary/10 group-hover:border-primary/30 transition-all">
-                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-tighter">MAY</p>
-                      <Zap size={16} className="text-primary mt-1" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-white group-hover:text-primary transition-colors">{event.title}</p>
-                      <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">{event.date} • {event.type}</p>
-                    </div>
-
-                    {/* Pop-up Box */}
-                    <AnimatePresence>
-                      {hoveredEvent === event && (
-                        <motion.div
-                          initial={{ opacity: 0, x: -10, scale: 0.95 }}
-                          animate={{ opacity: 1, x: 0, scale: 1 }}
-                          exit={{ opacity: 0, x: -10, scale: 0.95 }}
-                          className="absolute right-full mr-6 top-0 w-80 bg-slate-900 border border-primary/30 rounded-3xl p-6 shadow-2xl z-[100] backdrop-blur-2xl"
-                        >
-                          <div className="mb-4 pb-4 border-b border-white/5">
-                            <h4 className="text-primary font-black uppercase text-[10px] tracking-widest mb-1">{event.details?.state_jurisdiction} Operational Brief</h4>
-                            <p className="text-white font-bold">{event.title}</p>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div>
-                               <p className="text-[8px] text-slate-500 font-black uppercase mb-1">Election Date</p>
-                               <p className="text-xs text-white font-bold">{event.details?.election_date}</p>
-                            </div>
-                            <div>
-                               <p className="text-[8px] text-slate-500 font-black uppercase mb-1">Result Date</p>
-                               <p className="text-xs text-emerald-500 font-bold">{event.details?.result_date}</p>
-                            </div>
-                            <div>
-                               <p className="text-[8px] text-slate-500 font-black uppercase mb-1">Total Seats</p>
-                               <p className="text-xs text-white font-bold">{event.details?.total_seats}</p>
-                            </div>
-                            <div>
-                               <p className="text-[8px] text-slate-500 font-black uppercase mb-1">Constituencies</p>
-                               <p className="text-xs text-white font-bold">{event.details?.total_constituencies}</p>
-                            </div>
-                          </div>
-
-                          <div>
-                             <p className="text-[8px] text-slate-500 font-black uppercase mb-2">Primary Nominations</p>
-                             <div className="space-y-2">
-                                {event.details?.candidates.map((cand: string, idx: number) => (
-                                  <div key={idx} className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-xl border border-white/5">
-                                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                                    <span className="text-[10px] text-slate-300 font-medium">{cand}</span>
-                                  </div>
-                                ))}
-                             </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+            
+            {!liveIntel ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 opacity-20">
+                <div className="space-y-4">{[1, 2, 3].map(i => <div key={i} className="h-20 bg-white/10 rounded-2xl animate-pulse" />)}</div>
+                <div className="space-y-4">{[1, 2, 3].map(i => <div key={i} className="h-20 bg-white/10 rounded-2xl animate-pulse" />)}</div>
+                <div className="space-y-4">{[1, 2, 3].map(i => <div key={i} className="h-20 bg-white/10 rounded-2xl animate-pulse" />)}</div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                
+                {/* Past Elections and Results */}
+                <div className="flex flex-col">
+                  <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2 shrink-0">
+                    <CheckCircle2 size={16} className="text-emerald-500" /> Past Elections & Results
+                  </h4>
+                  <div className="space-y-4 overflow-y-auto max-h-[550px] pr-3 scrollbar-thin scrollbar-thumb-white/20 hover:scrollbar-thumb-emerald-500/50 scrollbar-track-white/5 rounded-xl">
+                    {liveIntel.past_results?.map((event: any, i: number) => (
+                      <div 
+                        key={`past-${i}`} 
+                        onClick={() => setSelectedEvent(event)}
+                        className="flex items-center gap-4 group cursor-pointer p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl hover:bg-emerald-500/10 hover:border-emerald-500/50 transition-all"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
+                          <CheckCircle2 size={20} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white group-hover:text-emerald-500 transition-colors">{event.title}</p>
+                          <p className="text-[10px] text-emerald-500/70 font-black uppercase tracking-widest mt-1">Winner: {event.details?.winner || 'Data Unavailable'}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))
-              ) : (
-                <div className="space-y-4 opacity-20">
-                  {[1, 2, 3].map(i => <div key={i} className="h-14 bg-white/10 rounded-2xl animate-pulse" />)}
                 </div>
-              )}
-            </div>
+
+                {/* Upcoming Elections */}
+                <div className="flex flex-col">
+                  <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2 shrink-0">
+                    <Calendar size={16} className="text-blue-500" /> Upcoming Elections
+                  </h4>
+                  <div className="space-y-4 overflow-y-auto max-h-[550px] pr-3 scrollbar-thin scrollbar-thumb-white/20 hover:scrollbar-thumb-blue-500/50 scrollbar-track-white/5 rounded-xl">
+                    {liveIntel.upcoming_elections?.map((event: any, i: number) => (
+                      <div 
+                        key={`upe-${i}`} 
+                        onClick={() => setSelectedEvent(event)}
+                        className="flex items-center gap-4 group cursor-pointer p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-blue-500/10 hover:border-blue-500/30 transition-all"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500 shrink-0">
+                          <Calendar size={20} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white group-hover:text-blue-500 transition-colors">{event.title}</p>
+                          <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Voting: {event.details.election_date}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Upcoming Results */}
+                <div className="flex flex-col">
+                  <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2 shrink-0">
+                    <Zap size={16} className="text-amber-500" /> Upcoming Results
+                  </h4>
+                  <div className="space-y-4 overflow-y-auto max-h-[550px] pr-3 scrollbar-thin scrollbar-thumb-white/20 hover:scrollbar-thumb-amber-500/50 scrollbar-track-white/5 rounded-xl">
+                    {liveIntel.upcoming_results?.map((event: any, i: number) => (
+                      <div 
+                        key={`upr-${i}`} 
+                        onClick={() => setSelectedEvent(event)}
+                        className="flex items-center gap-4 group cursor-pointer p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-amber-500/10 hover:border-amber-500/30 transition-all"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+                          <Zap size={20} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white group-hover:text-amber-500 transition-colors">{event.title}</p>
+                          <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Expected: {event.details.result_date}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Pop-up Modal */}
+                <AnimatePresence>
+                  {selectedEvent && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                      {/* Backdrop */}
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setSelectedEvent(null)}
+                        className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm cursor-pointer"
+                      />
+                      
+                      {/* Modal Content */}
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                        className="relative w-full max-w-lg bg-slate-900 border border-primary/30 rounded-[2rem] p-8 shadow-2xl shadow-primary/20 z-10"
+                      >
+                        <button 
+                          onClick={() => setSelectedEvent(null)}
+                          className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors"
+                        >
+                          <XCircle size={24} />
+                        </button>
+
+                        <div className="mb-6 pb-6 border-b border-white/5">
+                          <h4 className="text-primary font-black uppercase text-xs tracking-widest mb-2 flex items-center gap-2">
+                            <MapPin size={14} /> {selectedEvent.details?.state_jurisdiction} Operational Brief
+                          </h4>
+                          <p className="text-2xl text-white font-black">{selectedEvent.title}</p>
+                          <p className="text-sm text-slate-400 mt-1">{selectedEvent.type} Election</p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6 mb-8">
+                          <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                             <p className="text-[10px] text-slate-500 font-black uppercase mb-1 flex items-center gap-2"><Calendar size={12}/> Election Date</p>
+                             <p className="text-sm text-white font-bold">{selectedEvent.details?.election_date}</p>
+                          </div>
+                          <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                             <p className="text-[10px] text-slate-500 font-black uppercase mb-1 flex items-center gap-2"><Zap size={12}/> Result Date</p>
+                             <p className="text-sm text-emerald-500 font-bold">{selectedEvent.details?.result_date}</p>
+                          </div>
+                          <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                             <p className="text-[10px] text-slate-500 font-black uppercase mb-1 flex items-center gap-2"><Users size={12}/> Total Seats</p>
+                             <p className="text-sm text-white font-bold">{selectedEvent.details?.total_seats}</p>
+                          </div>
+                          <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                             <p className="text-[10px] text-slate-500 font-black uppercase mb-1 flex items-center gap-2"><Globe size={12}/> Constituencies</p>
+                             <p className="text-sm text-white font-bold">{selectedEvent.details?.total_constituencies}</p>
+                          </div>
+                        </div>
+
+                        <div>
+                           <p className="text-[10px] text-slate-500 font-black uppercase mb-3 flex items-center gap-2"><ShieldAlert size={14}/> Key Competitors / Results</p>
+                           <div className="space-y-3">
+                              {selectedEvent.details?.candidates.map((cand: string, idx: number) => (
+                                <div key={idx} className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
+                                  <div className="w-2 h-2 bg-primary rounded-full" />
+                                  <span className="text-xs text-slate-200 font-bold">{cand}</span>
+                                </div>
+                              ))}
+                           </div>
+                        </div>
+                      </motion.div>
+                    </div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
         </div>
 

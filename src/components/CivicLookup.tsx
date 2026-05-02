@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { MapPin, Search, Landmark, User, ExternalLink, Mail, Phone } from 'lucide-react';
 
 export const CivicLookup = () => {

@@ -6,3 +6,4 @@ firebase-admin
 pydantic
 python-multipart
 httpx
+aiohttp

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { chatWithAssistant } from '../src/services/gemini';
+import { chatWithAssistant } from './gemini';
 
 // Mock the Gemini API
 vi.mock('@google/generative-ai', () => ({

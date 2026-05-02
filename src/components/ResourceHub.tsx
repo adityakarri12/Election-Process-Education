@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { motion } from 'framer-motion';
 import { BookOpen, Scale, Landmark, FileText, Info } from 'lucide-react';
 

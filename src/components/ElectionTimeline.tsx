@@ -1,5 +1,4 @@
-import React from 'react';
-import { UserPlus, Search, MapPin, Vote, Trophy, CheckCircle2 } from 'lucide-react';
+import { UserPlus, Search, MapPin, Vote, Trophy } from 'lucide-react';
 
 const steps = [
   {
