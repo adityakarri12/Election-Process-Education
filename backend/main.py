@@ -39,10 +39,16 @@ logger = logging.getLogger("ElectraLearn")
 # Global System Constants
 CACHE_EXPIRY_SECONDS = 600
 
-# Core Intelligence Engines (Modularized)
+# Core Intelligence Engines (Lazy-Loaded)
 intel_cache = IntelligenceCache(ttl_seconds=CACHE_EXPIRY_SECONDS)
-api_keys_list = [k.strip() for k in (os.getenv("VITE_GEMINI_API_KEY") or "").split(",") if k.strip()]
-ai_cluster = GenAICluster(api_keys_list)
+_ai_cluster = None
+
+def get_ai_cluster():
+    global _ai_cluster
+    if _ai_cluster is None:
+        api_keys_list = [k.strip() for k in (os.getenv("VITE_GEMINI_API_KEY") or "").split(",") if k.strip()]
+        _ai_cluster = GenAICluster(api_keys_list)
+    return _ai_cluster
 
 app = FastAPI(
     title="ElectraLearn Intelligence API", 
@@ -59,16 +65,16 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
         content={"error": "Platform Intelligence Offline", "detail": "Autonomous systems are recalibrating."},
     )
 
-# Security Middleware & Headers
-@app.middleware("http")
-async def add_security_headers(request: Request, call_next):
-    response = await call_next(request)
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*.googleusercontent.com;"
-    return response
+# Security Middleware & Headers (Disabled for Debug)
+# @app.middleware("http")
+# async def add_security_headers(request: Request, call_next):
+#     response = await call_next(request)
+#     # response.headers["X-Content-Type-Options"] = "nosniff"
+#     # response.headers["X-Frame-Options"] = "DENY"
+#     # response.headers["X-XSS-Protection"] = "1; mode=block"
+#     # response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+#     # response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*.googleusercontent.com;"
+#     return response
 
 app.add_middleware(
     CORSMiddleware,
@@ -79,6 +85,7 @@ app.add_middleware(
 )
 
 api_router = APIRouter()
+
 
 # --- Models ---
 class ChatRequest(BaseModel):
@@ -189,7 +196,7 @@ async def get_constituency_data(pincode: str):
     """
     
     try:
-        res = await ai_cluster.generate(
+        res = await get_ai_cluster().generate(
             contents=prompt,
             model="gemini-2.0-flash",
             config=types.GenerateContentConfig(temperature=0.1, response_mime_type="application/json")
@@ -232,7 +239,7 @@ async def get_live_intelligence() -> Dict[str, Any]:
     """
     
     try:
-        res = await ai_cluster.generate(
+        res = await get_ai_cluster().generate(
             contents=prompt,
             model="gemini-2.0-flash",
             config=types.GenerateContentConfig(temperature=0.2, response_mime_type="application/json")
@@ -429,6 +436,8 @@ async def get_stats():
         "summary": {"total_voters": "968.8M", "polling_stations": "1.05M", "female_voters": "471.2M", "first_time_voters": "18.4M"},
         "turnout_history": [{"year": "2014", "rate": 66.4}, {"year": "2019", "rate": 67.4}, {"year": "2024", "rate": 66.1}]
     }
+
+
 
 app.include_router(api_router, prefix="/api")
 
