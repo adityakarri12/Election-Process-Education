@@ -18,6 +18,7 @@ interface EvaluationReport {
   cluster_reliability: string;
   workflow_breadth_score: string;
   total_validated_nodes: number;
+  total_tests_conducted: number;
   verification_status: string;
   automated_validations: {
     json_schema_checks: string;

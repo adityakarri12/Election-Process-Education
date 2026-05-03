@@ -72,7 +72,12 @@ export const Navbar = () => {
           {/* Navigation Items */}
           <div className="hidden md:flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/10 backdrop-blur-md">
             {navItems.map((item) => {
-              const isActive = pathname === item.href;
+              // Handle trailing slash comparison
+              const currentPath = pathname.endsWith('/') && pathname !== '/' 
+                ? pathname.slice(0, -1) 
+                : pathname;
+              const isActive = currentPath === item.href;
+              
               return (
                 <Link
                   key={item.href}

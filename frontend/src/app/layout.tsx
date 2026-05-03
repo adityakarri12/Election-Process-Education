@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Outfit, Inter } from "next/font/google";
 import "./globals.css";
 
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
   },
 };
 
+import { Suspense } from "react";
 import { FloatingChatButton } from "@/components/ui/FloatingChatButton";
 import ConditionalFooter from "@/components/layout/ConditionalFooter";
 import { AuthProvider } from "@/context/AuthContext";
@@ -35,12 +37,15 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${outfit.variable} ${inter.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         <script src="https://accounts.google.com/gsi/client" async defer></script>
       </head>
       <body className="min-h-full flex flex-col">
-        <GAIntegration gaId={process.env.NEXT_PUBLIC_GA_ID || "G-ELECTION2026"} />
+        <Suspense fallback={null}>
+          <GAIntegration gaId={process.env.NEXT_PUBLIC_GA_ID || "G-ELECTION2026"} />
+        </Suspense>
         <AuthProvider>
           <Navbar />
           {children}

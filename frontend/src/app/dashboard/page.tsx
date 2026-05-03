@@ -1,13 +1,22 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { Navbar } from '@/components/layout/Navbar';
-import { ElectionDashboard } from '@/components/features/ElectionDashboard';
-import { TestingEvaluation } from '@/components/features/TestingEvaluation';
 import { Footer } from '@/components/layout/Footer';
 import { Activity, ShieldCheck, BarChart3, Gauge } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+
+const ElectionDashboard = dynamic(
+  () => import('@/components/features/ElectionDashboard').then(mod => mod.ElectionDashboard),
+  { ssr: false }
+);
+
+const TestingEvaluation = dynamic(
+  () => import('@/components/features/TestingEvaluation').then(mod => mod.TestingEvaluation),
+  { ssr: false }
+);
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<'analytics' | 'testing'>('analytics');
