@@ -113,8 +113,16 @@ export const Footer = () => {
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-2 text-emerald-500/60 font-black text-[9px] uppercase tracking-tighter">
-            <Shield size={12} /> SSL Secured & Encrypted
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl">
+               <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                 Powered by <span className="text-white">Google Cloud</span> Ecosystem
+               </span>
+            </div>
+            <div className="flex items-center gap-2 text-emerald-500/60 font-black text-[9px] uppercase tracking-tighter">
+              <Shield size={12} /> SSL Secured & Encrypted
+            </div>
           </div>
         </div>
       </div>

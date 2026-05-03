@@ -9,6 +9,7 @@ import {
   X, Menu, Clock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 
 type Chat = {
   id: string;
@@ -25,6 +26,7 @@ const QUICK_PROMPTS = [
 ];
 
 export const ChatAssistant = () => {
+  const { showError } = useAuth();
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeChatId, setActiveChatId] = useState<string>('default');
   const [input, setInput] = useState('');
@@ -113,21 +115,41 @@ export const ChatAssistant = () => {
     try {
       const response = await fetch('/api/chatbot', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: messageToSend })
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          message: messageToSend,
+          history: activeChat?.messages.map(m => ({ 
+            role: m.role === 'user' ? 'user' : 'model', 
+            content: m.text 
+          })) || []
+        })
       });
+
+      if (response.status === 429) {
+        throw new Error("QUOTA_EXCEEDED");
+      }
+
+      if (!response.ok) throw new Error("SERVER_ERROR");
+
       const data = await response.json();
       const finalMessages = [...newMessages, { role: 'bot', text: data.response }];
       setChats(prev => prev.map(c => 
         c.id === activeChatId ? { ...c, messages: finalMessages } : c
       ));
       
-      // Auto-speak new response
       handleSpeak(data.response, finalMessages.length - 1);
 
-    } catch (error) {
+    } catch (error: any) {
+      let errorMsg = "Connectivity issue. Please ensure your backend is operational.";
+      if (error.message === "QUOTA_EXCEEDED") {
+        errorMsg = "Autonomous AI failover in progress. The cluster is currently recalibrating due to high demand. Please retry in a few seconds.";
+      }
+      
+      showError(errorMsg);
       setChats(prev => prev.map(c => 
-        c.id === activeChatId ? { ...c, messages: [...newMessages, { role: 'bot', text: "Connection error. Please check your backend." }] } : c
+        c.id === activeChatId ? { ...c, messages: [...newMessages, { role: 'bot', text: "AI Cluster recalibrating. Please check the notification for details." }] } : c
       ));
     } finally {
       setIsLoading(false);

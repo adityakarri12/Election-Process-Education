@@ -61,6 +61,7 @@ export const ElectionDashboard = () => {
         </div>
         <div className="flex gap-3">
           <button 
+            suppressHydrationWarning
             onClick={downloadReport}
             className="px-8 py-4 bg-primary text-white rounded-2xl font-bold flex items-center gap-2 hover:scale-105 transition-all shadow-xl shadow-primary/20"
           >

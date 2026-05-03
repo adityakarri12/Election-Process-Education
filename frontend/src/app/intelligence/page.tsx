@@ -9,8 +9,45 @@ import {
   Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 
-// --- DATA ---
+// --- TYPES ---
+interface ElectionDetails {
+  election_date: string;
+  result_date: string;
+  candidates: string[];
+  winner?: string | null;
+  total_seats: number;
+  total_constituencies: number;
+  state_jurisdiction: string;
+}
+
+interface ElectoralEvent {
+  title: string;
+  date: string;
+  type: string;
+  details?: ElectionDetails;
+}
+
+interface IntelligenceData {
+  upcoming_elections: ElectoralEvent[];
+  upcoming_results: ElectoralEvent[];
+  past_results: ElectoralEvent[];
+}
+
+interface ConstituencyData {
+  name: string;
+  state: string;
+  mp: string;
+  mla: string;
+  district: string;
+  booths: number;
+  turnout: string;
+  status: string;
+}
+
+// --- COMPONENTS ---
+
 const MYTHS = [
   { id: 1, myth: "EVMs can be hacked via Bluetooth or Wi-Fi.", reality: "EVMs are standalone machines with no wireless communication capabilities.", isTrue: false },
   { id: 2, myth: "NRI voters can vote online from abroad.", reality: "NRI voters must be physically present at their polling station in India.", isTrue: false },
@@ -18,13 +55,11 @@ const MYTHS = [
   { id: 4, myth: "Voters can register in multiple constituencies if they own property.", reality: "It is illegal to be registered in more than one constituency.", isTrue: false },
 ];
 
-// --- COMPONENTS ---
-
-const MythBuster = () => {
-  const [index, setIndex] = useState(0);
+const MythBuster: React.FC = () => {
+  const [index, setIndex] = useState<number>(0);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
-  const [score, setScore] = useState(0);
-  const [isMounted, setIsMounted] = useState(false);
+  const [score, setScore] = useState<number>(0);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -45,7 +80,10 @@ const MythBuster = () => {
   };
 
   return (
-    <div className="bg-slate-900/40 border border-white/10 rounded-[3rem] p-10 relative overflow-hidden h-[450px] flex flex-col items-center justify-center text-center">
+    <section 
+      aria-labelledby="mythbuster-title"
+      className="bg-slate-900/40 border border-white/10 rounded-[3rem] p-10 relative overflow-hidden h-[450px] flex flex-col items-center justify-center text-center"
+    >
       <div className="absolute top-0 inset-x-0 h-1 bg-white/5">
         <div 
           className="h-full bg-primary transition-all duration-300 ease-out" 
@@ -59,22 +97,20 @@ const MythBuster = () => {
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-500 text-[10px] font-black uppercase tracking-widest">
               <ShieldAlert size={14} /> Myth vs Reality
             </div>
-            <h3 className="text-3xl font-black text-white leading-tight max-w-md">
+            <h3 id="mythbuster-title" className="text-3xl font-black text-white leading-tight max-w-md">
               "{MYTHS[index].myth}"
             </h3>
             <div className="flex gap-4 justify-center">
               <button 
                 onClick={() => handleAnswer(true)}
-                aria-label="Mark as Fact"
-                suppressHydrationWarning
+                aria-label="Answer Fact"
                 className="px-8 py-3 bg-emerald-500 text-white rounded-2xl font-black text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20"
               >
                 FACT
               </button>
               <button 
                 onClick={() => handleAnswer(false)}
-                aria-label="Mark as Myth"
-                suppressHydrationWarning
+                aria-label="Answer Myth"
                 className="px-8 py-3 bg-red-500 text-white rounded-2xl font-black text-sm hover:scale-105 transition-all shadow-lg shadow-red-500/20"
               >
                 MYTH
@@ -102,15 +138,16 @@ const MythBuster = () => {
       <div className="absolute bottom-10 right-10">
         <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">XP Gained: <span className="text-primary">{score}</span></p>
       </div>
-    </div>
+    </section>
   );
 };
 
-const ConstituencyPulse = () => {
-  const [pincode, setPincode] = useState('');
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+const ConstituencyPulse: React.FC = () => {
+  const { showError } = useAuth();
+  const [pincode, setPincode] = useState<string>('');
+  const [data, setData] = useState<ConstituencyData | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -123,23 +160,29 @@ const ConstituencyPulse = () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/constituency/${pincode}`);
-      if (!res.ok) throw new Error(`Server returned ${res.status}`);
-      const contentType = res.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Server did not return JSON");
+      
+      if (res.status === 429) {
+        showError("The Constituency Pulse engine is currently recalibrating. Autonomous failover is active, please retry in a moment.");
+        return;
       }
-      const json = await res.json();
+      
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      const json: ConstituencyData = await res.json();
       setData(json);
     } catch (e) {
-      console.error(e);
+      console.error("Constituency Search Error:", e);
+      showError("Connectivity issue. Please ensure your backend is running.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-slate-900/40 border border-white/10 rounded-[3rem] p-10 h-full">
-      <h3 className="text-2xl font-black text-white mb-2 tracking-tighter flex items-center gap-3">
+    <section 
+      aria-labelledby="pulse-title"
+      className="bg-slate-900/40 border border-white/10 rounded-[3rem] p-10 h-full"
+    >
+      <h3 id="pulse-title" className="text-2xl font-black text-white mb-2 tracking-tighter flex items-center gap-3">
         <MapPin className="text-primary" /> Constituency Pulse
       </h3>
       <p className="text-slate-500 text-xs mb-8">Enter pincode to fetch real-time representative data.</p>
@@ -152,14 +195,12 @@ const ConstituencyPulse = () => {
           value={pincode}
           onChange={(e) => setPincode(e.target.value)}
           aria-label="Indian Pincode Input"
-          suppressHydrationWarning
           className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-6 pr-20 text-white focus:border-primary/50 outline-none transition-all"
         />
         <button 
           onClick={search}
           disabled={pincode.length !== 6 || loading}
           aria-label="Search Constituency Details"
-          suppressHydrationWarning
           className="absolute right-2 top-2 bottom-2 px-4 bg-primary text-white rounded-xl text-xs font-black disabled:opacity-50"
         >
           {loading ? <Loader2 className="animate-spin" size={16} /> : 'PULSE'}
@@ -203,31 +244,40 @@ const ConstituencyPulse = () => {
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 };
 
 export default function IntelligencePage() {
-  const [liveIntel, setLiveIntel] = useState<any>(null);
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const { showError } = useAuth();
+  const [liveIntel, setLiveIntel] = useState<IntelligenceData | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<ElectoralEvent | null>(null);
 
   useEffect(() => {
     const fetchLiveIntel = async () => {
       try {
         const res = await fetch(`/api/intelligence/live`);
-        if (!res.ok) throw new Error(`Server returned ${res.status}`);
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Server did not return JSON");
+        
+        if (res.status === 429) {
+          showError("The Electoral Intelligence Hub is currently at peak capacity. Autonomous failover is in progress, please refresh in a moment.");
+          return;
         }
-        const data = await res.json();
-        setLiveIntel(data);
+
+        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+        const data: IntelligenceData = await res.json();
+        
+        if (data && (data.upcoming_elections || data.past_results)) {
+          setLiveIntel(data);
+        } else {
+          throw new Error("Invalid Response Format");
+        }
       } catch (e) {
-        console.error("Failed to fetch live intel", e);
+        console.error("Critical: Intelligence Retrieval Failure", e);
+        showError("The electoral intelligence hub is currently syncing. Please try again shortly.");
       }
     };
     fetchLiveIntel();
-  }, []);
+  }, [showError]);
 
   return (
     <div className="min-h-screen bg-slate-950 pt-32 pb-20 px-6 overflow-hidden relative">
@@ -256,7 +306,7 @@ export default function IntelligencePage() {
                   <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2 shrink-0">
                     <CheckCircle2 size={16} className="text-emerald-500" /> Past Elections & Results
                   </h4>
-                  <div className="space-y-4 overflow-y-auto max-h-[550px] pr-3 scrollbar-thin scrollbar-thumb-white/20 hover:scrollbar-thumb-emerald-500/50 scrollbar-track-white/5 rounded-xl">
+                  <div className="space-y-4 overflow-y-auto max-h-[700px] pr-3 scrollbar-thin scrollbar-thumb-emerald-500/20 hover:scrollbar-thumb-emerald-500/50 scrollbar-track-white/5 rounded-xl">
                     {liveIntel.past_results?.map((event: any, i: number) => (
                       <div 
                         key={`past-${i}`} 
@@ -280,7 +330,7 @@ export default function IntelligencePage() {
                   <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2 shrink-0">
                     <Calendar size={16} className="text-blue-500" /> Upcoming Elections
                   </h4>
-                  <div className="space-y-4 overflow-y-auto max-h-[550px] pr-3 scrollbar-thin scrollbar-thumb-white/20 hover:scrollbar-thumb-blue-500/50 scrollbar-track-white/5 rounded-xl">
+                  <div className="space-y-4 overflow-y-auto max-h-[700px] pr-3 scrollbar-thin scrollbar-thumb-blue-500/20 hover:scrollbar-thumb-blue-500/50 scrollbar-track-white/5 rounded-xl">
                     {liveIntel.upcoming_elections?.map((event: any, i: number) => (
                       <div 
                         key={`upe-${i}`} 
@@ -292,7 +342,7 @@ export default function IntelligencePage() {
                         </div>
                         <div>
                           <p className="text-sm font-bold text-white group-hover:text-blue-500 transition-colors">{event.title}</p>
-                          <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Voting: {event.details.election_date}</p>
+                          <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Voting: {event.details?.election_date || 'TBA'}</p>
                         </div>
                       </div>
                     ))}
@@ -304,7 +354,7 @@ export default function IntelligencePage() {
                   <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2 shrink-0">
                     <Zap size={16} className="text-amber-500" /> Upcoming Results
                   </h4>
-                  <div className="space-y-4 overflow-y-auto max-h-[550px] pr-3 scrollbar-thin scrollbar-thumb-white/20 hover:scrollbar-thumb-amber-500/50 scrollbar-track-white/5 rounded-xl">
+                  <div className="space-y-4 overflow-y-auto max-h-[700px] pr-3 scrollbar-thin scrollbar-thumb-amber-500/20 hover:scrollbar-thumb-amber-500/50 scrollbar-track-white/5 rounded-xl">
                     {liveIntel.upcoming_results?.map((event: any, i: number) => (
                       <div 
                         key={`upr-${i}`} 
@@ -316,7 +366,7 @@ export default function IntelligencePage() {
                         </div>
                         <div>
                           <p className="text-sm font-bold text-white group-hover:text-amber-500 transition-colors">{event.title}</p>
-                          <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Expected: {event.details.result_date}</p>
+                          <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Expected: {event.details?.result_date || 'TBA'}</p>
                         </div>
                       </div>
                     ))}
