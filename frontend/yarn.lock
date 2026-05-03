@@ -2351,7 +2351,7 @@ find-up@^5.0.0:
 
 firebase@^12.12.1:
   version "12.12.1"
-  resolved "https://registry.npmjs.org/firebase/-/firebase-12.12.1.tgz"
+  resolved "https://registry.yarnpkg.com/firebase/-/firebase-12.12.1.tgz#4c5145ce819509b1e547d27aef584ab719809d29"
   integrity sha512-ee7xA+bTJLfjB9BP/8FQr3EkxmpAAGc1lNc5QkWgTDpUw24HYXFPm7FEWRdLtGnygxIdYpFmepSc5VjkI6NHhw==
   dependencies:
     "@firebase/ai" "2.11.1"

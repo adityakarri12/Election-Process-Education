@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit, Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -27,6 +28,7 @@ import ConditionalFooter from "@/components/layout/ConditionalFooter";
 import { AuthProvider } from "@/context/AuthContext";
 import { Navbar } from "@/components/layout/Navbar";
 import GAIntegration from "@/components/GoogleAnalytics";
+import "@/lib/firebase"; // Firebase Advanced Analytics & Core Services
 
 export default function RootLayout({
   children,
@@ -40,7 +42,29 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <script src="https://accounts.google.com/gsi/client" async defer></script>
+        <Script 
+          src="https://accounts.google.com/gsi/client" 
+          strategy="beforeInteractive"
+        />
+        <Script 
+          id="google-translate-config"
+          strategy="beforeInteractive"
+        >
+          {`
+            window.googleTranslateElementInit = function() {
+              new google.translate.TranslateElement({
+                pageLanguage: 'en', 
+                includedLanguages: 'en,hi,te,ta,bn,mr,gu,kn,ml,pa,es,fr,de,ja,zh-CN',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+              }, 'google_translate_element');
+            };
+          `}
+        </Script>
+        <Script 
+          src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+          strategy="afterInteractive"
+        />
       </head>
       <body className="min-h-full flex flex-col">
         <Suspense fallback={null}>

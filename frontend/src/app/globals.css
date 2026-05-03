@@ -54,3 +54,52 @@
     transform: rotateY(180deg);
   }
 }
+
+/* --- GOOGLE TRANSLATE PREMIUM RESTYLING --- */
+.google-translate-wrapper {
+  @apply overflow-hidden flex items-center;
+}
+
+.goog-te-gadget {
+  @apply !font-sans !text-transparent;
+}
+
+.goog-te-gadget .goog-te-combo {
+  @apply !bg-transparent !border-none !text-white !text-[10px] !font-black !uppercase !tracking-widest !outline-none !cursor-pointer !transition-all;
+  width: 120px !important;
+  padding: 4px 0 !important;
+}
+
+.goog-te-gadget .goog-te-combo option {
+  @apply !bg-slate-900 !text-white !font-bold !py-2;
+}
+
+/* Hide Branding & Banners */
+.goog-te-gadget span, 
+.goog-logo-link, 
+.goog-te-banner-frame {
+  @apply !hidden;
+}
+
+body {
+  top: 0 !important;
+}
+
+/* Scrollable for mobile/small screens if needed */
+/* --- CUSTOM SCROLLBAR FOR LANGUAGE MENU --- */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

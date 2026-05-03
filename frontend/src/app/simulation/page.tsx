@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Navbar } from '@/components/layout/Navbar';
 import { ElectionSimulation } from '@/components/features/ElectionSimulation';
 import { Gamepad2, ShieldCheck, Zap, Target, Award, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -33,7 +32,6 @@ export default function SimulationPage() {
 
   return (
     <div className="min-h-screen bg-slate-950">
-      <Navbar />
       
       <main className="pt-40 pb-24">
         {/* CENTERED HEADER */}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   PieChart, Pie, Cell, Legend
@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { 
   Users, UserPlus, Home, TrendingUp, 
   Download, RefreshCw, Sparkles,
-  Lock, Database, ShieldCheck, CheckCircle2
+  Lock, Database, ShieldCheck, CheckCircle2, Trophy
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -39,6 +39,22 @@ const mockData = {
 
 export const ElectionDashboard = () => {
   const [data] = useState<any>(mockData);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        const res = await fetch('/api/leaderboard');
+        if (res.ok) {
+          const lb = await res.json();
+          setLeaderboard(lb);
+        }
+      } catch (e) {
+        console.error("Leaderboard fetch error:", e);
+      }
+    };
+    fetchLeaderboard();
+  }, []);
 
   const downloadReport = () => {
     // This function can be adapted to download the mock data
@@ -194,6 +210,54 @@ export const ElectionDashboard = () => {
             </div>
           </div>
         ))}
+      </div>
+      
+      {/* GOOGLE CLOUD FIRESTORE LEADERBOARD */}
+      <div className="bg-slate-900/40 border border-white/10 rounded-[3.5rem] p-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] pointer-events-none" />
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+          <div>
+            <h3 className="text-3xl font-black text-white tracking-tighter flex items-center gap-4">
+              <Trophy size={32} className="text-primary" /> Top Democratic Experts
+            </h3>
+            <p className="text-slate-500 mt-2">Live rankings powered by Google Cloud Firestore database.</p>
+          </div>
+          <div className="px-6 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3">
+             <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+             Real-time Sync Active
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {leaderboard.length > 0 ? leaderboard.map((user: any, i: number) => (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.05 }}
+              key={i} 
+              className="group flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-[2.5rem] hover:bg-white/10 hover:border-primary/40 transition-all relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors" />
+              <div className="flex items-center gap-5 relative z-10">
+                <div className="w-12 h-12 rounded-2xl bg-slate-950 flex items-center justify-center text-sm font-black text-slate-500 group-hover:text-primary transition-colors border border-white/5">
+                   #{i + 1}
+                </div>
+                <div>
+                  <p className="text-lg font-black text-white uppercase tracking-tight">{user.role || 'Expert'}</p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Decision Accuracy: {user.accuracy || 100}%</p>
+                </div>
+              </div>
+              <div className="text-right relative z-10">
+                <p className="text-2xl font-black text-primary">{user.score} XP</p>
+                <div className="h-1 w-full bg-primary/20 rounded-full mt-1 overflow-hidden">
+                   <div className="h-full bg-primary" style={{ width: `${(user.score / 500) * 100}%` }} />
+                </div>
+              </div>
+            </motion.div>
+          )) : (
+            [1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-28 bg-white/5 rounded-[2.5rem] animate-pulse" />)
+          )}
+        </div>
       </div>
 
     </div>

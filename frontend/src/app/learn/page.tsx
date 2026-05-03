@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Navbar } from '@/components/layout/Navbar';
 import { JourneyVisualizer } from '@/components/features/JourneyVisualizer';
 import { MythFactSection } from '@/components/features/MythFactSection';
 import { Glossary } from '@/components/features/Glossary';
@@ -15,8 +14,6 @@ import {
 export default function LearnPage() {
   return (
     <div className="min-h-screen bg-slate-950">
-      <Navbar />
-      
       <main className="pt-40 pb-48">
         {/* CENTERED HEADER SECTION */}
         <div className="container mx-auto px-6 mb-32 text-center">

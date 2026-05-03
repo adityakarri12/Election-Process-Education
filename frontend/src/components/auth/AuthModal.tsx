@@ -19,13 +19,27 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const [showGooglePicker, setShowGooglePicker] = useState(false);
 
   useEffect(() => {
+    const handleResponse = (response: any) => {
+      handleGoogleCredentialResponse(response);
+    };
+
     if (typeof window !== 'undefined' && (window as any).google) {
-      (window as any).google.accounts.id.initialize({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "YOUR_CLIENT_ID.apps.googleusercontent.com",
-        callback: handleGoogleCredentialResponse,
-      });
+      if (!(window as any).__GSI_INITIALIZED__) {
+        (window as any).google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "YOUR_CLIENT_ID.apps.googleusercontent.com",
+          callback: (resp: any) => {
+            window.dispatchEvent(new CustomEvent('gsi-success', { detail: resp }));
+          },
+          auto_select: false,
+        });
+        (window as any).__GSI_INITIALIZED__ = true;
+      }
     }
-  }, [isOpen]);
+
+    const listener = (e: any) => handleResponse(e.detail);
+    window.addEventListener('gsi-success', listener);
+    return () => window.removeEventListener('gsi-success', listener);
+  }, []);
 
   const handleGoogleCredentialResponse = (response: any) => {
     // In a real app, you would verify this JWT on the backend

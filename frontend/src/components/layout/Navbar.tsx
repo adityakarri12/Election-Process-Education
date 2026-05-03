@@ -8,7 +8,7 @@ import {
   Vote, Home, BookOpen, Gamepad2, 
   LayoutDashboard, User, MessageSquare, 
   ChevronDown, LogOut, Settings, Award, 
-  Shield, Bell, Zap, Globe, CheckCircle2
+  Shield, Bell, Zap, Globe, CheckCircle2, Search
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
@@ -102,8 +102,14 @@ export const Navbar = () => {
             })}
           </div>
 
-          {/* API Key Selector & Auth/Profile Section */}
+          {/* API Key Selector, Google Translate & Auth/Profile Section */}
           <div className="flex items-center gap-4">
+            
+            {/* Global Language Selector - Reliable Direct Integration */}
+            <div className="hidden lg:flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-3 py-1.5 hover:bg-white/10 transition-all group">
+              <Globe size={14} className="text-primary animate-pulse" />
+              <div id="google_translate_element" suppressHydrationWarning className="google-translate-wrapper"></div>
+            </div>
 
             {!isLoading && (
               user ? (
@@ -111,6 +117,7 @@ export const Navbar = () => {
                 <div className="relative">
                   <button 
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
+                    suppressHydrationWarning
                     aria-label="User Profile Menu"
                     aria-expanded={showProfileMenu}
                     aria-haspopup="true"

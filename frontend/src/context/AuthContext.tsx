@@ -3,6 +3,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Toast } from '@/components/ui/Toast';
 
+/**
+ * Defines the structure of an Authenticated User within the ElectraLearn ecosystem.
+ */
 type User = {
   name: string;
   email: string;
@@ -11,16 +14,26 @@ type User = {
   joinedAt: number;
 };
 
+/**
+ * Authentication Context Interface detailing available operations.
+ */
 type AuthContextType = {
   user: User | null;
+  /** Logs in a user and provisions their local session. */
   login: (email: string, name: string, avatar?: string) => void;
+  /** Terminates the user session securely. */
   logout: () => void;
   isLoading: boolean;
+  /** Triggers a global toast error notification. */
   showError: (msg: string) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * AuthProvider Component
+ * Wraps the application to provide persistent authentication state and global error handling.
+ */
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);

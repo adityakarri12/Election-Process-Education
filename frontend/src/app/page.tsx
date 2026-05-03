@@ -7,14 +7,11 @@ import {
   MessageSquare, Globe, CheckCircle, 
   FileText, Info
 } from 'lucide-react';
-import { Navbar } from '@/components/layout/Navbar';
 import Link from 'next/link';
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-slate-950">
-      <Navbar />
-      
       <main>
         {/* HERO SECTION - The "Wow" Factor */}
         <section id="home" className="relative pt-40 pb-24 overflow-hidden">

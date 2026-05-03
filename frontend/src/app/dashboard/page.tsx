@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Activity, ShieldCheck, BarChart3, Gauge } from 'lucide-react';
 import { useState } from 'react';
@@ -23,7 +22,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-950">
-      <Navbar />
       
       <main id="main-content" className="pt-40 pb-24">
         {/* HEADER */}
