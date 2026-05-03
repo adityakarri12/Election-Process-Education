@@ -13,6 +13,10 @@ google-cloud-pubsub
 google-cloud-tasks
 google-cloud-vision
 pydantic
+pydantic-settings
+python-json-logger
 python-multipart
 httpx
 aiohttp
+pytest
+pytest-asyncio

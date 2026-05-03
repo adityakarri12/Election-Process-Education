@@ -266,7 +266,13 @@ export const ChatAssistant = () => {
       </AnimatePresence>
 
       {/* MESSAGES AREA */}
-      <div ref={scrollRef} className="flex-grow overflow-y-auto p-12 space-y-10 scroll-smooth">
+      <div 
+        ref={scrollRef} 
+        role="log"
+        aria-live="polite"
+        aria-label="Chat Message History"
+        className="flex-grow overflow-y-auto p-12 space-y-10 scroll-smooth"
+      >
         <div className="max-w-5xl mx-auto w-full">
           {activeChat?.messages.map((m, i) => (
             <motion.div
@@ -295,6 +301,7 @@ export const ChatAssistant = () => {
                     <button 
                       suppressHydrationWarning
                       onClick={() => handleSpeak(m.text, i)}
+                      aria-label={speakingIndex === i ? "Stop Text to Speech" : "Play Text to Speech"}
                       className={cn(
                         "absolute top-4 right-4 w-10 h-10 rounded-xl flex items-center justify-center transition-all border",
                         speakingIndex === i 
@@ -302,7 +309,7 @@ export const ChatAssistant = () => {
                           : "bg-white/5 border-white/10 text-slate-500 hover:text-white hover:bg-white/10"
                       )}
                     >
-                      {speakingIndex === i ? <Volume2 size={18} /> : <VolumeX size={18} />}
+                      {speakingIndex === i ? <Volume2 size={18} aria-hidden="true" /> : <VolumeX size={18} aria-hidden="true" />}
                     </button>
                   )}
                 </div>

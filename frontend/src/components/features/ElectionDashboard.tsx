@@ -40,8 +40,10 @@ const mockData = {
 export const ElectionDashboard = () => {
   const [data] = useState<any>(mockData);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const fetchLeaderboard = async () => {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
@@ -122,21 +124,23 @@ export const ElectionDashboard = () => {
             </h4>
           </div>
           <div className="h-[400px] relative z-10">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data.turnout_history}>
-                <defs>
-                  <linearGradient id="colorRate" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                <XAxis dataKey="year" stroke="#64748b" fontSize={12} tickLine={false} />
-                <YAxis stroke="#64748b" fontSize={12} tickLine={false} unit="%" />
-                <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '16px' }} />
-                <Area type="monotone" dataKey="rate" stroke="#3b82f6" strokeWidth={4} fill="url(#colorRate)" />
-              </AreaChart>
-            </ResponsiveContainer>
+            {isMounted && (
+              <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+                <AreaChart data={data.turnout_history} aria-label="Voter turnout history from 2004 to 2024">
+                  <defs>
+                    <linearGradient id="colorRate" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                  <XAxis dataKey="year" stroke="#64748b" fontSize={12} tickLine={false} />
+                  <YAxis stroke="#64748b" fontSize={12} tickLine={false} unit="%" />
+                  <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '16px' }} />
+                  <Area type="monotone" dataKey="rate" stroke="#3b82f6" strokeWidth={4} fill="url(#colorRate)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -146,16 +150,18 @@ export const ElectionDashboard = () => {
             <Users size={20} className="text-amber-500" /> Voter Age Groups
           </h4>
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={data.demographics} cx="50%" cy="50%" innerRadius={80} outerRadius={110} paddingAngle={5} dataKey="value">
-                  {data.demographics && Array.isArray(data.demographics) && data.demographics.map((entry: any, index: number) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '16px' }} />
-              </PieChart>
-            </ResponsiveContainer>
+            {isMounted && (
+              <ResponsiveContainer width="100%" height="100%" minHeight={250}>
+                <PieChart aria-label="Voter age group distribution">
+                  <Pie data={data.demographics} cx="50%" cy="50%" innerRadius={80} outerRadius={110} paddingAngle={5} dataKey="value">
+                    {data.demographics && Array.isArray(data.demographics) && data.demographics.map((entry: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '16px' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4 mt-8">
             {data.demographics && Array.isArray(data.demographics) && data.demographics.map((d: any, i: number) => (
