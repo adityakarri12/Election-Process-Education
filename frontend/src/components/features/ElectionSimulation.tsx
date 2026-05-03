@@ -79,7 +79,8 @@ export const ElectionSimulation = () => {
         setIsFinished(true);
         // Boost: Persist simulation results to Firestore
         try {
-          await fetch('/api/save-progress', {
+          const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+          await fetch(`${baseUrl}/api/save-progress`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -95,7 +96,8 @@ export const ElectionSimulation = () => {
   const downloadScorecard = async () => {
     // Advanced Boost: Generate professional certificate via Google Cloud Storage
     try {
-      const res = await fetch(`/api/generate-certificate?user_id=${selectedRole}_${score}`);
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${baseUrl}/api/generate-certificate?user_id=${selectedRole}_${score}`);
       const data = await res.json();
       if (data.url) {
         window.open(data.url, '_blank');

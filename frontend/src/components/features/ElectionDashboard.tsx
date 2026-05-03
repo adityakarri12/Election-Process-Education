@@ -44,7 +44,8 @@ export const ElectionDashboard = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await fetch('/api/leaderboard');
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        const res = await fetch(`${baseUrl}/api/leaderboard`);
         if (res.ok) {
           const lb = await res.json();
           setLeaderboard(lb);
